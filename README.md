@@ -1,48 +1,83 @@
-# I'm Upping My P(doom) — remake
+# I'm Upping My P(doom) — Remake
 
-A new, code-rendered video for the same song: one unbroken take across an AI safety researcher's desk at night, printed in two inks (cobalt blue, tomato red) on paper. A blue marble crosses the desk while a spilled bottle of red ink floods it; the flooded share of the desk is the current P(doom).
+Source code for a Claude-made music video about AI safety, using the original song and timing data with a new visual design.
 
-- Script and shot list: [`docs/SCRIPT.md`](docs/SCRIPT.md) (Traditional Chinese; all on-screen text is English)
-- Early concept notes: [`docs/pdoom.md`](docs/pdoom.md)
+The film follows a blue marble across an AI safety researcher's desk. Cobalt blue and tomato red inks turn the room into a moving print, while spilled red ink and a flip clock track the rising P(doom). Lyrics appear on objects throughout the scene: rulers, receipts, coffee rings, book spines, computer windows, and spectacle lenses.
 
-## Run
+**Video:** 1920 × 1080 · 60 fps · 156.65 seconds · includes music.
 
-Needs Node, Google Chrome and ffmpeg.
-
-```sh
-cd app
-npm install
-npx vite                      # preview at http://localhost:5173 (space = play, ←/→ = seek, ?t=23 to start at a time)
-```
-
-Render:
-
-```sh
-cd app
-node scripts/render.mjs video --samples 4 --out ../out/pdoom-remake.mp4      # 1920×1080, 60 fps, with audio
-node scripts/render.mjs stills --t 23.8,59.9 --out ../out/stills
-node scripts/render.mjs sheet --from 20 --to 40 --n 20 --cols 5 --out ../out/sheet.jpg
-```
-
-`--samples N` averages N sub-frames per frame for motion blur. `--png` sends lossless frames to the encoder (slower).
-
-## How it is built
-
-| Path | What it is |
-|---|---|
-| `app/src/engine/` | Timeline playback, word-level lyric and beat data, GL helpers, typography. Taken from the original project (see Credits); `post.ts`, `hud.ts` and `palette.ts` are rewritten. |
-| `app/src/engine/post.ts` | The print pass. Scenes output ink coverage per plate, not colour (red channel = red plate, blue channel = blue plate, green = object id). This pass turns tints into halftone dots, shifts the red plate against the blue, draws key lines where ids differ, and multiplies the inks onto paper. |
-| `app/src/engine/hud.ts` | The fixed lyric line (bottom left), the footnotes (top left), and the P(doom) value over time. |
-| `app/src/film/core.ts` | The rig: one 3D world, drawing surfaces (canvases on real faces of props), one keyed camera path, animators that are pure functions of song time. |
-| `app/src/film/desk.ts` | The set: the desk and every prop on, under and around it. |
-| `app/src/film/seq1.ts` … `seq5.ts` | The 52 shots, in order. Every cue is looked up from the lyric timings, never hard-coded. |
-| `app/src/film/notes.ts` | The footnote texts. |
-| `app/scripts/render.mjs` | Offline renderer: headless Chrome → frames → ffmpeg. |
-
-The camera never cuts. Where the script jumps between two places, both show the same full-frame picture at that instant, so the jump is invisible.
+The rendered MP4 is kept locally at `out/pdoom-remake.mp4`. Video exports and review images are excluded from Git; this repository contains the source and assets needed to render the film.
 
 ## Credits
 
-- **Song:** "I'm Upping My P(doom)". Lyrics by [osmarks](https://docs.osmarks.net/hypha/p%28doom%29_song_objectively_correct_interpretation), built on an opening verse and chorus by MusicPerson, with lines suggested on the EleutherAI Discord. This video uses the "Claude-Pop" version posted by deckard (@slimer48484). The song and lyrics (`audio/`, `data/lyrics.json`) belong to their authors.
-- **Engine and timing data:** from [mexicat/pdoom-video](https://github.com/mexicat/pdoom-video) (MIT, see `LICENSE.upstream`). The scenes, look, script and print pipeline here are new.
-- **Fonts:** Archivo, IBM Plex Mono, Cormorant Garamond (SIL Open Font License).
+- **Song:** "I'm Upping My P(doom)". Lyrics by [osmarks](https://docs.osmarks.net/hypha/p%28doom%29_song_objectively_correct_interpretation), built on an opening verse and chorus by MusicPerson, with lines suggested on the EleutherAI Discord. This remake uses the "Claude-Pop" version posted by deckard (@slimer48484). The song and lyrics belong to their authors.
+- **Original engine and timing data:** [mexicat/pdoom-video](https://github.com/mexicat/pdoom-video), under the MIT license. See [`LICENSE.upstream`](LICENSE.upstream).
+- **Fonts:** Archivo, IBM Plex Mono, and Cormorant Garamond, under the SIL Open Font License. See [`app/public/fonts/src/OFL.txt`](app/public/fonts/src/OFL.txt).
+
+## How it was made
+
+The remake was developed with Claude through a directed, iterative process:
+
+1. Keep the existing song, word-level lyric timings, beat data, and AI safety theme.
+2. Design a new visual world with a two-ink print aesthetic and a marble connecting the scenes.
+3. Carry each transition through an object, movement, or shared composition from the preceding scene.
+4. Place lyrics inside the scene and animate their emphasis with the vocals.
+5. Review successive renders and refine motion, camera framing, transitions, and text readability.
+
+Human feedback guided the script and revisions. The scene design and print pipeline are new; the shared engine and timing data come from the credited upstream project.
+
+The film is rendered from code using Three.js, WebGL, and Canvas 2D. A continuous camera journey links the desk's props with graphic sequences; matching compositions bridge transitions between spaces.
+
+## What's here
+
+| Path | What it is |
+|---|---|
+| [`docs/SCRIPT.md`](docs/SCRIPT.md) | Script and shot plan in Traditional Chinese; on-screen text is English |
+| [`docs/pdoom.md`](docs/pdoom.md) | Early concept notes |
+| [`app/src/film/`](app/src/film/) | Desk, props, camera choreography, scene lyrics, and the five film sequences |
+| [`app/src/engine/`](app/src/engine/) | Playback, timing, typography, rendering helpers, and the print effect |
+| [`app/src/main.ts`](app/src/main.ts) | Browser preview player and frame export API |
+| [`app/scripts/render.mjs`](app/scripts/render.mjs) | Headless Chrome rendering and ffmpeg encoding |
+| [`audio/pdoom.mp3`](audio/pdoom.mp3) | Song used in the film |
+| [`data/`](data/) | Word-level lyrics and audio analysis |
+| [`app/public/fonts/`](app/public/fonts/) | Bundled fonts |
+| [`docs/ENGINE.upstream.md`](docs/ENGINE.upstream.md) | Upstream engine notes; some options refer to the original project's renderer |
+
+## Preview
+
+You need Node.js 22.12 or newer and Google Chrome. Rendering also requires ffmpeg on your `PATH`. The renderer currently selects Chrome's Metal graphics backend and was used on macOS; other platforms may need a graphics-backend adjustment in `app/scripts/render.mjs`.
+
+```bash
+git clone https://github.com/cgsaxto/pdoom-explainer.git
+cd pdoom-explainer/app
+npm ci
+npm run dev
+```
+
+Open the local URL printed by Vite, usually `http://localhost:5173`.
+
+- **Space** or click the video: play / pause.
+- **← / →:** seek one second; hold **Shift** to seek five seconds.
+- **, / .:** step backward / forward one frame.
+- **H:** toggle the player controls.
+- Add `?t=23` to the URL to start at a specific time.
+
+## Rendering
+
+Run these commands from `app/`. The renderer starts a local Vite server when needed.
+
+```bash
+# Full film: 1080p60, H.264 video, AAC audio
+node scripts/render.mjs video --samples 4 --out ../out/pdoom-remake.mp4
+
+# Render a short section for review
+node scripts/render.mjs video --from 96 --to 100 --samples 4 --out ../out/review.mp4
+
+# Export individual frames
+node scripts/render.mjs stills --t 23.8,59.9 --out ../out/stills
+
+# Export a contact sheet
+node scripts/render.mjs sheet --from 20 --to 40 --n 20 --cols 5 --out ../out/sheet.jpg
+```
+
+`--samples 4` averages four sub-frames per frame for motion blur. `--png` uses lossless intermediate frames, at the cost of slower rendering. Video encoding defaults to 60 fps and CRF 16; use `--fps` and `--crf` to override them.
