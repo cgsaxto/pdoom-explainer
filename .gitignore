@@ -1,0 +1,15 @@
+# Rendered videos, stills, and review images
+/out/
+
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+.cache/
+*.tsbuildinfo
+
+# Local environment and machine files
+.env
+.env.*
+.DS_Store
+*.log
